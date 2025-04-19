@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsureToday - Health Insurance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary: #0067b1;
+            --secondary: #00a0df;
+            --accent: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        
+        .insurance-card {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .insurance-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ced4da;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 0.25rem rgba(0, 103, 177, 0.25);
+            border-color: var(--primary);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #0074c8 0%, #00b2f5 100%);
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            width: 0;
+            transition: width 0.5s ease;
+        }
+        
+        .section-title {
+            position: relative;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent);
+        }
+        
+        .float-label {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .float-label label {
+            position: absolute;
+            left: 1rem;
+            top: 0.75rem;
+            transition: all 0.2s ease;
+            pointer-events: none;
+            color: #6c757d;
+        }
+        
+        .float-label input:focus ~ label,
+        .float-label input:not(:placeholder-shown) ~ label {
+            top: -0.5rem;
+            left: 0.5rem;
+            font-size: 0.75rem;
+            padding: 0 0.25rem;
+            background-color: white;
+            color: var(--primary);
+        }
+        
+        .feedback-icon {
+            position: absolute;
+            right: 1rem;
+            top: 0.75rem;
+            color: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .is-valid ~ .feedback-icon {
+            opacity: 1;
+            color: #28a745;
+        }
+        
+        .is-invalid ~ .feedback-icon {
+            opacity: 1;
+            color: #dc3545;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Form field animations */
+        .animate-field {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .floating-shield {
+            position: absolute;
+            right: -50px;
+            top: 30px;
+            width: 120px;
+            opacity: 0.15;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .step-title {
+            font-size: 0.75rem;
+            color: #6c757d;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active .step-circle {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 5px rgba(0, 103, 177, 0.2);
+        }
+        
+        .step.active .step-title {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .step.completed .step-circle {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .step-connector {
+            position: absolute;
+            top: 20px;
+            height: 2px;
+            background-color: #e9ecef;
+            width: 100%;
+            z-index: 0;
+        }
+        
+        .step-connector-progress {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        /* Toast notification styling */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        
+        .toast {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            animation: slideInRight 0.3s ease forwards;
+            max-width: 350px;
+        }
+        
+        .toast-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+        
+        .toast-success {
+            border-left: 4px solid #28a745;
+        }
+        
+        .toast-error {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .toast-warning {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .toast-info {
+            border-left: 4px solid var(--primary);
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="insurance-card animate__animated animate__fadeIn">
+                    <div class="card-header position-relative">
+                        <h2 class="mb-0 animate__animated animate__fadeInDown">
+                            <i class="bi bi-shield-check me-2"></i>Health Insurance Application
+                        </h2>
+                        <p class="text-white-50 mb-0 animate__animated animate__fadeIn animate__delay-1s">
+                            Complete your details to get covered
+                        </p>
+                        
+                        <!-- SVG Shield Icon -->
+                        <svg class="floating-shield" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24.00 24.00" fill="none">
+                            <path d="M20.9098 11.1203V6.73031C20.9098 5.91031 20.2898 4.98031 19.5198 4.67031L13.9898 2.39031C12.9398 1.99031 11.0698 1.99031 10.0198 2.39031L4.47981 4.67031C3.70981 4.98031 3.08981 5.91031 3.08981 6.73031V11.1203C3.08981 16.0103 6.63981 20.5903 11.9998 21.9303C17.3598 20.5903 20.9098 16.0103 20.9098 11.1203ZM12.0001 12.5001C10.6201 12.5001 9.50009 11.3801 9.50009 10.0001C9.50009 8.62009 10.6201 7.50009 12.0001 7.50009C13.3801 7.50009 14.5001 8.62009 14.5001 10.0001C14.5001 11.3801 13.3801 12.5001 12.0001 12.5001Z" fill="currentColor"></path>
+                        </svg>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="step-indicator mb-4">
+                            <div class="step-connector">
+                                <div class="step-connector-progress" id="progressBar"></div>
+                            </div>
+                            <div class="d-flex justify-content-between position-relative w-100">
+                                <div class="step active" data-step="1">
+                                    <div class="step-circle">1</div>
+                                    <div class="step-title">Personal Details</div>
+                                </div>
+                                <div class="step" data-step="2">
+                                    <div class="step-circle">2</div>
+                                    <div class="step-title">Identity Details</div>
+                                </div>
+                                <div class="step" data-step="3">
+                                    <div class="step-circle">3</div>
+                                    <div class="step-title">Contact Details</div>
+                                </div>
+                                <div class="step" data-step="4">
+                                    <div class="step-circle">4</div>
+                                    <div class="step-title">Review & Submit</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form id="insuranceForm" class="needs-validation" novalidate>
+                            <!-- Section 1: Personal Details -->
+                            <div class="section active" id="section1">
+                                <h4 class="section-title animate__animated animate__fadeIn">Personal Details</h4>
+                                
+                                <div class="row g-3">
+                                    <div class="col-12 animate-field" style="animation-delay: 0.1s;">
+                                        <div class="float-label">
+                                            <input type="text" class="form-control" id="name" name="name" placeholder=" " required>
+                                            <label for="name">Full Name</label>
+                                            <i class="bi bi-check-circle feedback-icon"></i>
+                                            <div class="invalid-feedback">Please enter your full name</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 animate-field" style="animation-delay: 0.2s;">
+                                        <div class="float-label">
+                                            <input type="date" class="form-control" id="dob" name="dob" placeholder=" " required>
+                                            <label for="dob">Date of Birth</label>
+                                            <div class="invalid-feedback">Please select your date of birth</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 animate-field" style="animation-delay: 0.3s;">
+                                        <div class="form-group">
+                                            <label class="form-label">Gender</label>
+                                            <div class="d-flex">
+                                                <div class="form-check me-4">
+                                                    <input class="form-check-input" type="radio" name="gender" id="genderMale" value="Male" required>
+                                                    <label class="form-check-label" for="genderMale">Male</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="Female">
+                                                    <label class="form-check-label" for="genderFemale">Female</label>
+                                                </div>
+                                                <div class="form-check ms-4">
+                                                    <input class="form-check-input" type="radio" name="gender" id="genderOther" value="Other">
+                                                    <label class="form-check-label" for="genderOther">Other</label>
+                                                </div>
+                                            </div>
+                                            <div class="invalid-feedback">Please select your gender</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 animate-field" style="animation-delay: 0.4s;">
+                                        <div class="form-group">
+                                            <label class="form-label" for="married">Marital Status</label>
+                                            <select class="form-select" id="married" name="married" required>
+                                                <option value="" selected disabled>Select your marital status</option>
+                                                <option value="Single">Single</option>
+                                                <option value="Married">Married</option>
+                                                <option value="Divorced">Divorced</option>
+                                                <option value="Widowed">Widowed</option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select your marital status</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 animate-field" style="animation-delay: 0.5s;">
+                                        <div class="float-label">
+                                            <input type="text" class="form-control" id="address" name="address" placeholder=" " required>
+                                            <label for="address">Address</label>
+                                            <div class="invalid-feedback">Please enter your address</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-end mt-4">
+                                    <button type="button" class="btn btn-primary next-btn animate__animated animate__fadeIn" data-next="2">
+                                        Continue to Identity Details <i class="bi bi-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Section 2: Identity Details -->
+                            <div class="section" id="section2">
+                                <h4 class="section-title">Identity Details</h4>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6 animate-field" style="animation-delay: 0.1s;">
+                                        <div class="float-label">
+                                            <input type="text" class="form-control" id="aadharNumber" name="aadharNumber" placeholder=" " pattern="[0-9]{12}" required>
+                                            <label for="aadharNumber">Aadhaar Number</label>
+                                            <div class="invalid-feedback">Please enter a valid 12-digit Aadhaar number</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 animate-field" style="animation-delay: 0.2s;">
+                                        <div class="float-label">
+                                            <input type="text" class="form-control" id="panNumber" name="panNumber" placeholder=" " pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" required>
+                                            <label for="panNumber">PAN Number</label>
+                                            <div class="invalid-feedback">Please enter a valid PAN number (e.g., ABCDE1234F)</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-12 animate-field" style="animation-delay: 0.3s;">
+                                        <div class="form-group">
+                                            <label class="form-label">User Type</label>
+                                            <select class="form-select" id="userType" name="userType" required>
+                                                <option value="" selected disabled>Select user type</option>
+                                                <option value="AC">AC</option>
+                                                <option value="BC">BC</option>
+                                                <option value="CC">CC</option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select your user type</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-outline-secondary prev-btn" data-prev="1">
+                                        <i class="bi bi-arrow-left me-2"></i> Back
+                                    </button>
+                                    <button type="button" class="btn btn-primary next-btn" data-next="3">
+                                        Continue to Contact Details <i class="bi bi-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Section 3: Contact Details -->
+                            <div class="section" id="section3">
+                                <h4 class="section-title">Contact Details</h4>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6 animate-field" style="animation-delay: 0.1s;">
+                                        <div class="float-label">
+                                            <input type="email" class="form-control" id="email" name="email" placeholder=" " required>
+                                            <label for="email">Email Address</label>
+                                            <div class="invalid-feedback">Please enter a valid email address</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 animate-field" style="animation-delay: 0.2s;">
+                                        <div class="float-label">
+                                            <input type="tel" class="form-control" id="mobile" name="mobile" placeholder=" " pattern="[0-9]{10}" required>
+                                            <label for="mobile">Mobile Number</label>
+                                            <div class="invalid-feedback">Please enter a valid 10-digit mobile number</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-outline-secondary prev-btn" data-prev="2">
+                                        <i class="bi bi-arrow-left me-2"></i> Back
+                                    </button>
+                                    <button type="button" class="btn btn-primary next-btn" data-next="4">
+                                        Review Application <i class="bi bi-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Section 4: Review & Submit -->
+                            <div class="section" id="section4">
+                                <h4 class="section-title">Review Your Application</h4>
+                                
+                                <div class="review-details p-3 rounded mb-4" style="background-color: rgba(0, 103, 177, 0.05);">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <p class="mb-1 fw-bold">Personal Details</p>
+                                            <div><strong>Name:</strong> <span id="review-name"></span></div>
+                                            <div><strong>Date of Birth:</strong> <span id="review-dob"></span></div>
+                                            <div><strong>Gender:</strong> <span id="review-gender"></span></div>
+                                            <div><strong>Marital Status:</strong> <span id="review-married"></span></div>
+                                            <div><strong>Address:</strong> <span id="review-address"></span></div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <p class="mb-1 fw-bold">Identity & Contact</p>
+                                            <div><strong>Aadhaar:</strong> <span id="review-aadhar"></span></div>
+                                            <div><strong>PAN:</strong> <span id="review-pan"></span></div>
+                                            <div><strong>User Type:</strong> <span id="review-userType"></span></div>
+                                            <div><strong>Email:</strong> <span id="review-email"></span></div>
+                                            <div><strong>Mobile:</strong> <span id="review-mobile"></span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                                    <label class="form-check-label" for="termsCheck">
+                                        I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms & Conditions</a> and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+                                    </label>
+                                    <div class="invalid-feedback">You must agree to the terms and conditions</div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-outline-secondary prev-btn" data-prev="3">
+                                        <i class="bi bi-arrow-left me-2"></i> Back
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                                        <span class="loading-spinner" id="submitSpinner"></span>
+                                        Submit Application
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4 text-muted">
+                    <small>© 2023 InsureToday. All rights reserved.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms & Conditions Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Terms & Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>These Terms & Conditions govern your use of our insurance services.</p>
+                    <p>By using our services, you agree to these terms. Please read them carefully.</p>
+                    <h6>1. Application Process</h6>
+                    <p>All information provided must be accurate and complete. Any false information may result in rejection of your application or cancellation of your policy.</p>
+                    <h6>2. Premium Payments</h6>
+                    <p>Insurance premiums must be paid on time as per the schedule provided. Failure to pay premiums may result in lapse of your policy.</p>
+                    <h6>3. Policy Activation</h6>
+                    <p>Your insurance policy will be activated only after verification of all submitted documents and receipt of initial premium payment.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="privacyModalLabel">Privacy Policy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>At InsureToday, we value your privacy and are committed to protecting your personal information.</p>
+                    <h6>1. Information Collection</h6>
+                    <p>We collect personal information that you provide during the application process, including contact details, identification information, and other necessary details.</p>
+                    <h6>2. Information Usage</h6>
+                    <p>Your information is used to process your application, provide insurance services, communicate with you, and comply with legal requirements.</p>
+                    <h6>3. Information Security</h6>
+                    <p>We implement security measures to protect your personal information from unauthorized access, alteration, or disclosure.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize date field with today's date
+            const today = new Date();
+            const formattedDate = today.toISOString().substr(0, 10);
+            document.getElementById('dob').value = formattedDate;
+            
+            // Form navigation functionality
+            const nextButtons = document.querySelectorAll('.next-btn');
+            const prevButtons = document.querySelectorAll('.prev-btn');
+            const sections = document.querySelectorAll('.section');
+            const steps = document.querySelectorAll('.step');
+            const progressBar = document.getElementById('progressBar');
+            
+            // Function to show toast notifications
+            function showToast(message, type = 'info') {
+                const toastContainer = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                let iconClass = 'bi-info-circle';
+                if (type === 'success') iconClass = 'bi-check-circle';
+                if (type === 'error') iconClass = 'bi-exclamation-circle';
+                if (type === 'warning') iconClass = 'bi-exclamation-triangle';
+                
+                toast.innerHTML = `
+                    <i class="bi ${iconClass} toast-icon"></i>
+                    <div>${message}</div>
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                // Remove toast after 5 seconds
+                setTimeout(() => {
+                    toast.style.animation = 'slideOutRight 0.3s ease forwards';
+                    setTimeout(() => {
+                        toastContainer.removeChild(toast);
+                    }, 300);
+                }, 5000);
+            }
+            
+            // Validate current section before proceeding to next
+            function validateSection(sectionNumber) {
+                const currentSection = document.getElementById(`section${sectionNumber}`);
+                const inputs = currentSection.querySelectorAll('input[required], select[required]');
+                let isValid = true;
+                
+                inputs.forEach(input => {
+                    if (input.type === 'radio') {
+                        // Special handling for radio buttons
+                        const radioGroup = document.querySelectorAll(`input[name="${input.name}"]`);
+                        const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                        if (!isChecked) {
+                            isValid = false;
+                            const radioParent = input.closest('.form-group');
+                            radioParent.querySelector('.invalid-feedback').style.display = 'block';
+                        }
+                    } else if (input.type === 'checkbox') {
+                        if (!input.checked) {
+                            isValid = false;
+                            input.classList.add('is-invalid');
+                        } else {
+                            input.classList.remove('is-invalid');
+                            input.classList.add('is-valid');
+                        }
+                    } else {
+                        // Text inputs, selects, etc.
+                        if (!input.value || (input.pattern && !new RegExp(input.pattern).test(input.value))) {
+                            isValid = false;
+                            input.classList.add('is-invalid');
+                            input.classList.remove('is-valid');
+                        } else {
+                            input.classList.remove('is-invalid');
+                            input.classList.add('is-valid');
+                        }
+                    }
+                });
+                
+                return isValid;
+            }
+            
+            // Function to move to next section
+            function moveToSection(current, next) {
+                if (validateSection(current)) {
+                    // Update active section
+                    sections.forEach(section => section.classList.remove('active'));
+                    document.getElementById(`section${next}`).classList.add('active');
+                    
+                    // Update step indicators
+                    steps.forEach(step => step.classList.remove('active', 'completed'));
+                    document.querySelector(`.step[data-step="${next}"]`).classList.add('active');
+                    
+                    // Mark previous steps as completed
+                    for (let i = 1; i < next; i++) {
+                        document.querySelector(`.step[data-step="${i}"]`).classList.add('completed');
+                    }
+                    
+                    // Animate the new fields
+                    const animateFields = document.querySelectorAll(`#section${next} .animate-field`);
+                    animateFields.forEach((field, index) => {
+                        field.style.animationDelay = `${0.1 * (index + 1)}s`;
+                        field.style.opacity = 0;
+                        // Trigger animation
+                        setTimeout(() => {
+                            field.style.opacity = 1;
+                        }, 10);
+                    });
+                    
+                    // Update progress bar
+                    const progressPercentage = ((next - 1) / (steps.length - 1)) * 100;
+                    progressBar.style.width = `${progressPercentage}%`;
+                    
+                    // If we're on the review section, populate review data
+                    if (next === 4) {
+                        populateReview();
+                    }
+                    
+                    // Scroll to top of form
+                    document.querySelector('.insurance-card').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    showToast('Please complete all required fields to proceed', 'warning');
+                }
+            }
+            
+            // Function to populate review data
+            function populateReview() {
+                const form = document.getElementById('insuranceForm');
+                document.getElementById('review-name').textContent = form.name.value;
+                document.getElementById('review-dob').textContent = new Date(form.dob.value).toLocaleDateString();
+                document.getElementById('review-gender').textContent = form.gender.value;
+                document.getElementById('review-married').textContent = form.married.value;
+                document.getElementById('review-address').textContent = form.address.value;
+                document.getElementById('review-aadhar').textContent = form.aadharNumber.value;
+                document.getElementById('review-pan').textContent = form.panNumber.value;
+                document.getElementById('review-userType').textContent = form.userType.value;
+                document.getElementById('review-email').textContent = form.email.value;
+                document.getElementById('review-mobile').textContent = form.mobile.value;
+            }
+            
+            // Event listeners for next buttons
+            nextButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const current = parseInt(this.getAttribute('data-next')) - 1;
+                    const next = parseInt(this.getAttribute('data-next'));
+                    moveToSection(current, next);
+                });
+            });
+            
+            // Event listeners for prev buttons
+            prevButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const prev = parseInt(this.getAttribute('data-prev'));
+                    const current = prev + 1;
+                    
+                    // Update active section
+                    sections.forEach(section => section.classList.remove('active'));
+                    document.getElementById(`section${prev}`).classList.add('active');
+                    
+                    // Update step indicators
+                    steps.forEach(step => step.classList.remove('active', 'completed'));
+                    document.querySelector(`.step[data-step="${prev}"]`).classList.add('active');
+                    
+                    // Mark previous steps as completed
+                    for (let i = 1; i < prev; i++) {
+                        document.querySelector(`.step[data-step="${i}"]`).classList.add('completed');
+                    }
+                    
+                    // Update progress bar
+                    const progressPercentage = ((prev - 1) / (steps.length - 1)) * 100;
+                    progressBar.style.width = `${progressPercentage}%`;
+                });
+            });
+            
+            // Real-time validation for inputs
+            const inputs = document.querySelectorAll('input[required], select[required]');
+            inputs.forEach(input => {
+                if (input.type !== 'radio' && input.type !== 'checkbox') {
+                    input.addEventListener('input', function() {
+                        if (this.value) {
+                            if (this.pattern && !new RegExp(this.pattern).test(this.value)) {
+                                this.classList.add('is-invalid');
+                                this.classList.remove('is-valid');
+                            } else {
+                                this.classList.remove('is-invalid');
+                                this.classList.add('is-valid');
+                            }
+                        } else {
+                            this.classList.add('is-invalid');
+                            this.classList.remove('is-valid');
+                        }
+                    });
+                }
+            });
+            
+            // Handle radio button validation
+            const radioGroups = document.querySelectorAll('input[type="radio"][required]');
+            radioGroups.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const radioGroup = document.querySelectorAll(`input[name="${this.name}"]`);
+                    radioGroup.forEach(r => {
+                        const radioParent = r.closest('.form-group');
+                        radioParent.querySelector('.invalid-feedback').style.display = 'none';
+                    });
+                });
+            });
+            
+            // Initialize gender validation
+            document.querySelectorAll('input[name="gender"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const value = this.value;
+                    document.querySelectorAll('input[name="gender"]').forEach(r => {
+                        r.checked = (r.value === value);
+                    });
+                });
+            });
+            
+            // Format Aadhaar number with spaces
+            const aadharInput = document.getElementById('aadharNumber');
+            aadharInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 12) {
+                    value = value.slice(0, 12);
+                }
+                e.target.value = value;
+            });
+            
+            // Format PAN number in uppercase
+            const panInput = document.getElementById('panNumber');
+            panInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase();
+            });
+            
+           // Replace the fetch call in your form submission handler with this version:
+
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (validateSection(4) && document.getElementById('termsCheck').checked) {
+        const submitBtn = document.getElementById('submitBtn');
+        const submitSpinner = document.getElementById('submitSpinner');
+        
+        // Show loading spinner
+        submitBtn.disabled = true;
+        submitSpinner.style.display = 'inline-block';
+        
+        // Prepare form data
+        const formData = {
+            aadharNumber: document.getElementById('aadharNumber').value,
+            address: document.getElementById('address').value,
+            branchId: "",
+            createdDate: new Date().toISOString().split('T')[0] + " 00:00:00",
+            dob: document.getElementById('dob').value + " 00:00:00",
+            email: document.getElementById('email').value.toUpperCase(),
+            gender: document.querySelector('input[name="gender"]:checked').value,
+            keyAccountManager: "100939",
+            married: document.getElementById('married').value,
+            mobile: document.getElementById('mobile').value,
+            name: document.getElementById('name').value,
+            panNumber: document.getElementById('panNumber').value,
+            pospCode: "",
+            pospFlag: "",
+            regionId: "",
+            roleId: "1",
+            userId: "1212",
+            userType: document.getElementById('userType').value,
+            lob: "HEALTH",
+            startPage: "Landing",
+            logOutUrl: "https://www.google.com"
+        };
+        
+        // In a production environment, this would be a direct API call
+        // For development/testing purposes, we'll simulate the API response
+        try {
+            // For local testing, simulate a successful API response
+            if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") {
+                // Simulate API processing time
+                setTimeout(() => {
+                    showToast('Application submitted successfully!', 'success');
+                    
+                    // Store form data in localStorage if needed
+                    localStorage.setItem('insuranceFormData', JSON.stringify(formData));
+                    
+                    // Redirect to health.insuretoday.in/id after 1.5 seconds
+                    setTimeout(() => {
+                        window.location.href = `https://health.insuretoday.in/${formData.userId}`;
+                    }, 1500);
+                }, 1000);
+            } else {
+                // In production: Make the actual API call
+                fetch('https://api.insuretoday.in/v2/redirection', {
+                    method: 'POST',
+                    headers: {
+                        'Secretkey': '1SB',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle success response
+                    showToast('Application submitted successfully!', 'success');
+                    
+                    // Redirect to health.insuretoday.in/id
+                    setTimeout(() => {
+                        window.location.href = `https://health.insuretoday.in/${formData.userId}`;
+                    }, 1500);
+                })
+                .catch(error => {
+                    // Handle error
+                    showToast('Error submitting application. Please try again.', 'error');
+                    console.error('Error:', error);
+                    
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitSpinner.style.display = 'none';
+                });
+            }
+        } catch (error) {
+            // Handle any unexpected errors
+            showToast('Error submitting application. Please try again.', 'error');
+            console.error('Error:', error);
+            
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitSpinner.style.display = 'none';
+        }
+    } else {
+        if (!document.getElementById('termsCheck').checked) {
+            showToast('Please accept the terms and conditions', 'warning');
+        } else {
+            showToast('Please complete all required fields', 'warning');
+        }
+    }
+});
+            
+            // Add additional form field validations
+            document.getElementById('email').addEventListener('input', function() {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(this.value)) {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                } else {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+            
+            document.getElementById('mobile').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 10) {
+                    value = value.slice(0, 10);
+                }
+                e.target.value = value;
+                
+                if (value.length !== 10) {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                } else {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
