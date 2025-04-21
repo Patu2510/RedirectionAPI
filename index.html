@@ -872,115 +872,140 @@
                 e.target.value = e.target.value.toUpperCase();
             });
             
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('insuranceForm');
-
-    if (!form) {
-        console.error("Form not found. Check that your form has id='insuranceForm'");
-        return;
-    }
 form.addEventListener('submit', function(e) {
-        e.preventDefault();
+    e.preventDefault();
+    
+    if (validateSection(4) && document.getElementById('termsCheck').checked) {
+        const submitBtn = document.getElementById('submitBtn');
+        const submitSpinner = document.getElementById('submitSpinner');
         
-        if (validateSection(4) && document.getElementById('termsCheck').checked) {
-            const submitBtn = document.getElementById('submitBtn');
-            const submitSpinner = document.getElementById('submitSpinner');
-
-            // Show loading spinner
-            submitBtn.disabled = true;
-            submitSpinner.style.display = 'inline-block';
-
-            // Prepare form data
-            const formData = {
-                aadharNumber: document.getElementById('aadharNumber').value,
-                address: document.getElementById('address').value,
-                branchId: "",
-                createdDate: new Date().toISOString().split('T')[0] + " 00:00:00",
-                dob: document.getElementById('dob').value + " 00:00:00",
-                email: document.getElementById('email').value.toUpperCase(),
-                gender: document.querySelector('input[name="gender"]:checked').value,
-                keyAccountManager: "100939",
-                married: document.getElementById('married').value,
-                mobile: document.getElementById('mobile').value,
-                name: document.getElementById('name').value,
-                panNumber: document.getElementById('panNumber').value,
-                pospCode: "",
-                pospFlag: "",
-                regionId: "",
-                roleId: "1",
-                userId: "1212",
-                userType: document.getElementById('userType').value,
-                lob: "HEALTH",
-                startPage: "Landing",
-                logOutUrl: "https://www.google.com"
-            };
-
-            fetch('https://dev.insurance.api.1silverbullet.tech/v2/redirection', {
-                method: 'POST',
-                headers: {
-                    'secretKey': '1SB',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(data => {
-                showToast('Application submitted successfully!', 'success');
-
-                // ✅ Redirect using returned URL
-                if (data?.data?.url) {
+        // Show loading spinner
+        submitBtn.disabled = true;
+        submitSpinner.style.display = 'inline-block';
+        
+        // Prepare form data
+        const formData = {
+            aadharNumber: document.getElementById('aadharNumber').value,
+            address: document.getElementById('address').value,
+            branchId: "",
+            createdDate: new Date().toISOString().split('T')[0] + " 00:00:00",
+            dob: document.getElementById('dob').value + " 00:00:00",
+            email: document.getElementById('email').value.toUpperCase(),
+            gender: document.querySelector('input[name="gender"]:checked').value,
+            keyAccountManager: "100939",
+            married: document.getElementById('married').value,
+            mobile: document.getElementById('mobile').value,
+            name: document.getElementById('name').value,
+            panNumber: document.getElementById('panNumber').value,
+            pospCode: "",
+            pospFlag: "",
+            regionId: "",
+            roleId: "1",
+            userId: "1212",
+            userType: document.getElementById('userType').value,
+            lob: "HEALTH",
+            startPage: "Landing",
+            logOutUrl: "https://www.google.com"
+        };
+        
+        // In a production environment, this would be a direct API call
+        // For development/testing purposes, we'll simulate the API response
+        try {
+            // For local testing, simulate a successful API response
+            if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") {
+                // Simulate API processing time
+                setTimeout(() => {
+                    showToast('Application submitted successfully!', 'success');
+                    
+                    // Store form data in localStorage if needed
+                    localStorage.setItem('insuranceFormData', JSON.stringify(formData));
+                    
+                    // Redirect to health.insuretoday.in/id after 1.5 seconds
                     setTimeout(() => {
-                        window.location.href = data.data.url;
+                        window.location.href = `https://health.insuretoday.in/${formData.userId}`;
                     }, 1500);
-                } else {
-                    showToast('No redirect URL found in response', 'warning');
-                }
-            })
-            .catch(error => {
-                showToast('Error submitting application. Please try again.', 'error');
-                console.error('Error:', error);
-                submitBtn.disabled = false;
-                submitSpinner.style.display = 'none';
-            });
-        } else {
-            if (!document.getElementById('termsCheck').checked) {
-                showToast('Please accept the terms and conditions', 'warning');
+                }, 1000);
             } else {
-                showToast('Please complete all required fields', 'warning');
+                // In production: Make the actual API call
+                fetch('https://api.insuretoday.in/v2/redirection', {
+                    method: 'POST',
+                    headers: {
+                        'Secretkey': '1SB',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle success response
+                    showToast('Application submitted successfully!', 'success');
+                    
+                    // Redirect to health.insuretoday.in/id
+                    setTimeout(() => {
+                        window.location.href = `https://health.insuretoday.in/${formData.userId}`;
+                    }, 1500);
+                })
+                .catch(error => {
+                    // Handle error
+                    showToast('Error submitting application. Please try again.', 'error');
+                    console.error('Error:', error);
+                    
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitSpinner.style.display = 'none';
+                });
             }
+        } catch (error) {
+            // Handle any unexpected errors
+            showToast('Error submitting application. Please try again.', 'error');
+            console.error('Error:', error);
+            
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitSpinner.style.display = 'none';
         }
-    });
-
-    // Email validation
-    document.getElementById('email').addEventListener('input', function() {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(this.value)) {
-            this.classList.add('is-invalid');
-            this.classList.remove('is-valid');
+    } else {
+        if (!document.getElementById('termsCheck').checked) {
+            showToast('Please accept the terms and conditions', 'warning');
         } else {
-            this.classList.remove('is-invalid');
-            this.classList.add('is-valid');
+            showToast('Please complete all required fields', 'warning');
         }
-    });
-
-    // Mobile number formatting
-    document.getElementById('mobile').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length > 10) value = value.slice(0, 10);
-        e.target.value = value;
-
-        if (value.length !== 10) {
-            this.classList.add('is-invalid');
-            this.classList.remove('is-valid');
-        } else {
-            this.classList.remove('is-invalid');
-            this.classList.add('is-valid');
-        }
-    });
+    }
 });
+            
+            // Add additional form field validations
+            document.getElementById('email').addEventListener('input', function() {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(this.value)) {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                } else {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+            
+            document.getElementById('mobile').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 10) {
+                    value = value.slice(0, 10);
+                }
+                e.target.value = value;
+                
+                if (value.length !== 10) {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                } else {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+        });
     </script>
 </body>
 </html>
