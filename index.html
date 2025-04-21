@@ -872,8 +872,13 @@
                 e.target.value = e.target.value.toUpperCase();
             });
             
-           // Replace the fetch call in your form submission handler with this version:
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('insuranceForm');
 
+    if (!form) {
+        console.error("Form not found. Check that your form has id='insuranceForm'");
+        return;
+    }
 form.addEventListener('submit', function(e) {
         e.preventDefault();
         
